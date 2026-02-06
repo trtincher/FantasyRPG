@@ -1,6 +1,8 @@
 import { Scene } from 'phaser';
 import { BattleSystem, BattleCallbacks } from '../systems/BattleSystem';
 import { ENEMIES } from '../data/enemies';
+import { ITEMS } from '../data/items';
+import { deserializeInventory, removeItem, serializeInventory } from '../utils/inventory';
 import {
   BattleState,
   BATTLE_BG_COLOR,
@@ -39,6 +41,12 @@ export class BattleScene extends Scene {
   private readonly playerBarX = 160;
   private readonly playerBarY = 172;
 
+  private menuIndex = 0;
+  private menuOptions = ['Attack', 'Defend', 'Item', 'Flee'];
+  private isItemSubMenu = false;
+  private itemMenuIndex = 0;
+  private itemMenuEntries: { key: string; name: string; count: number }[] = [];
+
   constructor() {
     super('BattleScene');
   }
@@ -46,6 +54,9 @@ export class BattleScene extends Scene {
   init(data: BattleInitData): void {
     this.initData = data;
     this.currentState = BattleState.INTRO;
+    this.menuIndex = 0;
+    this.isItemSubMenu = false;
+    this.itemMenuIndex = 0;
   }
 
   create(): void {
@@ -109,6 +120,9 @@ export class BattleScene extends Scene {
     if (this.input.keyboard) {
       this.input.keyboard.on('keydown-ENTER', this.handleConfirm, this);
       this.input.keyboard.on('keydown-SPACE', this.handleConfirm, this);
+      this.input.keyboard.on('keydown-UP', this.handleMenuUp, this);
+      this.input.keyboard.on('keydown-DOWN', this.handleMenuDown, this);
+      this.input.keyboard.on('keydown-ESC', this.handleMenuEscape, this);
     }
 
     const callbacks: BattleCallbacks = {
@@ -118,8 +132,10 @@ export class BattleScene extends Scene {
         damage: number,
         remainingHp: number
       ) => this.onDamageDealt(target, damage, remainingHp),
-      onBattleEnd: (result: 'victory' | 'defeat') =>
+      onBattleEnd: (result: 'victory' | 'defeat' | 'fled') =>
         this.onBattleEnd(result),
+      onHeal: (amount: number, newHp: number) => this.onHeal(amount, newHp),
+      onFleeAttempt: (success: boolean) => this.onFleeAttempt(success),
     };
 
     this.battleSystem = new BattleSystem(
@@ -130,13 +146,12 @@ export class BattleScene extends Scene {
         defense: playerDefense,
       },
       enemyData,
-      callbacks
+      callbacks,
+      this.initData.isBoss
     );
 
     this.battleSystem.start();
   }
-
-  // ── State machine ─────────────────────────────────────
 
   private onStateChange(state: BattleState): void {
     this.currentState = state;
@@ -179,15 +194,39 @@ export class BattleScene extends Scene {
         this.messageText.setText('Defeat...');
         this.menuText.setText('');
         break;
+
+      case BattleState.FLED:
+        this.menuText.setText('');
+        this.messageText.setText('Got away safely!');
+        break;
     }
   }
 
   private showPlayerTurn(): void {
+    this.menuIndex = 0;
+    this.isItemSubMenu = false;
+    this.renderMenu();
     this.messageText.setText('What will you do?');
-    this.menuText.setText('> Attack');
   }
 
-  // ── Damage callback ───────────────────────────────────
+  private renderMenu(): void {
+    const lines = this.menuOptions.map((opt, i) => {
+      return i === this.menuIndex ? `> ${opt}` : `  ${opt}`;
+    });
+    this.menuText.setText(lines.join('\n'));
+  }
+
+  private renderItemSubMenu(): void {
+    if (this.itemMenuEntries.length === 0) {
+      this.menuText.setText('  No items!');
+      return;
+    }
+    const lines = this.itemMenuEntries.map((entry, i) => {
+      const prefix = i === this.itemMenuIndex ? '> ' : '  ';
+      return `${prefix}${entry.name} x${entry.count}`;
+    });
+    this.menuText.setText(lines.join('\n'));
+  }
 
   private onDamageDealt(
     target: 'player' | 'enemy',
@@ -221,9 +260,20 @@ export class BattleScene extends Scene {
     }
   }
 
-  // ── Battle end callback ───────────────────────────────
+  private onBattleEnd(result: 'victory' | 'defeat' | 'fled'): void {
+    if (result === 'fled') {
+      this.time.delayedCall(1500, () => {
+        this.scene.wake('WorldScene', {
+          playerHp: this.battleSystem.getPlayerHp(),
+          encounterId: this.initData.encounterId,
+          result: 'fled',
+          xpGained: 0,
+        });
+        this.scene.stop('BattleScene');
+      });
+      return;
+    }
 
-  private onBattleEnd(result: 'victory' | 'defeat'): void {
     if (result === 'victory') {
       this.time.delayedCall(2000, () => {
         if (this.initData.isBoss) {
@@ -245,15 +295,118 @@ export class BattleScene extends Scene {
     }
   }
 
-  // ── Input ─────────────────────────────────────────────
+  private onHeal(amount: number, newHp: number): void {
+    const ratio = newHp / this.battleSystem.getPlayerMaxHp();
+    this.drawHpBar(this.playerHpBar, this.playerBarX, this.playerBarY, 0x33ff33, ratio);
+    this.messageText.setText(`Used item! Restored ${amount} HP.`);
+  }
+
+  private onFleeAttempt(success: boolean): void {
+    if (!success && this.initData.isBoss) {
+      this.messageText.setText("Can't escape from boss!");
+      this.time.delayedCall(1000, () => {
+        if (this.currentState === BattleState.PLAYER_TURN) {
+          this.showPlayerTurn();
+        }
+      });
+    } else if (!success) {
+      this.messageText.setText("Couldn't escape!");
+    }
+  }
 
   private handleConfirm(): void {
     if (this.currentState !== BattleState.PLAYER_TURN) return;
-    this.currentState = BattleState.ENEMY_TURN;
-    this.battleSystem.playerAttack();
+
+    if (this.isItemSubMenu) {
+      if (this.itemMenuEntries.length === 0) {
+        this.isItemSubMenu = false;
+        this.menuIndex = 2;
+        this.renderMenu();
+        this.messageText.setText('What will you do?');
+        return;
+      }
+      const entry = this.itemMenuEntries[this.itemMenuIndex];
+      const itemData = ITEMS[entry.key];
+      const invJson = this.game.registry.get('playerInventory') || '{}';
+      const inv = deserializeInventory(invJson);
+      const newInv = removeItem(inv, entry.key);
+      if (newInv) {
+        this.game.registry.set('playerInventory', serializeInventory(newInv));
+      }
+      this.isItemSubMenu = false;
+      this.battleSystem.playerUseItem(itemData.healAmount || 0);
+      return;
+    }
+
+    switch (this.menuIndex) {
+      case 0:
+        this.battleSystem.playerAttack();
+        break;
+      case 1:
+        this.battleSystem.playerDefend();
+        this.messageText.setText('You brace for impact!');
+        break;
+      case 2: {
+        const invJson = this.game.registry.get('playerInventory') || '{}';
+        const inv = deserializeInventory(invJson);
+        this.itemMenuEntries = Object.entries(inv)
+          .filter(([key]) => ITEMS[key] && ITEMS[key].type === 'consumable')
+          .map(([key, count]) => ({ key, name: ITEMS[key].name, count }));
+        this.isItemSubMenu = true;
+        this.itemMenuIndex = 0;
+        if (this.itemMenuEntries.length === 0) {
+          this.messageText.setText('No items!');
+          this.time.delayedCall(1000, () => {
+            if (this.currentState === BattleState.PLAYER_TURN) {
+              this.isItemSubMenu = false;
+              this.menuIndex = 2;
+              this.renderMenu();
+              this.messageText.setText('What will you do?');
+            }
+          });
+        } else {
+          this.messageText.setText('Use which item?');
+        }
+        this.renderItemSubMenu();
+        break;
+      }
+      case 3:
+        this.battleSystem.playerFlee();
+        break;
+    }
   }
 
-  // ── HP bar drawing ────────────────────────────────────
+  private handleMenuUp(): void {
+    if (this.currentState !== BattleState.PLAYER_TURN) return;
+    if (this.isItemSubMenu) {
+      this.itemMenuIndex = (this.itemMenuIndex - 1 + this.itemMenuEntries.length) % this.itemMenuEntries.length;
+      this.renderItemSubMenu();
+    } else {
+      this.menuIndex = (this.menuIndex - 1 + this.menuOptions.length) % this.menuOptions.length;
+      this.renderMenu();
+    }
+  }
+
+  private handleMenuDown(): void {
+    if (this.currentState !== BattleState.PLAYER_TURN) return;
+    if (this.isItemSubMenu) {
+      this.itemMenuIndex = (this.itemMenuIndex + 1) % this.itemMenuEntries.length;
+      this.renderItemSubMenu();
+    } else {
+      this.menuIndex = (this.menuIndex + 1) % this.menuOptions.length;
+      this.renderMenu();
+    }
+  }
+
+  private handleMenuEscape(): void {
+    if (this.currentState !== BattleState.PLAYER_TURN) return;
+    if (this.isItemSubMenu) {
+      this.isItemSubMenu = false;
+      this.menuIndex = 2;
+      this.renderMenu();
+      this.messageText.setText('What will you do?');
+    }
+  }
 
   private drawHpBar(
     bar: Phaser.GameObjects.Graphics,

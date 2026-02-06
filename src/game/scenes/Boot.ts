@@ -20,6 +20,7 @@ export class Boot extends Scene {
     this.load.image('skeleton', 'assets/sprites/skeleton.png');
     this.load.image('dark-knight', 'assets/sprites/dark-knight.png');
     this.load.image('npc', 'assets/sprites/npc.png');
+    this.load.image('potion', 'assets/sprites/potion.png');
   }
 
   create(): void {

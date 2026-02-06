@@ -1,5 +1,6 @@
 import { Boot } from './scenes/Boot';
 import { WorldScene } from './scenes/WorldScene';
+import { BattleScene } from './scenes/BattleScene';
 import { AUTO, Game } from 'phaser';
 import { CANVAS_WIDTH, CANVAS_HEIGHT, ZOOM } from './utils/Constants';
 
@@ -15,6 +16,7 @@ const config: Phaser.Types.Core.GameConfig = {
     scene: [
         Boot,
         WorldScene,
+        BattleScene,
     ]
 };
 

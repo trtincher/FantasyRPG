@@ -41,6 +41,31 @@ export class WorldScene extends Scene {
 
     this.gridPhysics = new GridPhysics(this.player, this.wallsLayer, this);
 
+    // Encounter detection
+    this.gridPhysics.setOnMoveComplete((tileX: number, tileY: number) => {
+      if (this.scene.isActive('BattleScene')) return; // Guard against double-trigger
+
+      const encounterTile = this.map.getTileAt(tileX, tileY, false, 'encounters');
+      if (encounterTile) {
+        const player = this.getPlayer();
+        this.scene.sleep('WorldScene');
+        this.scene.launch('BattleScene', {
+          playerHp: player.hp,
+          playerMaxHp: player.maxHp,
+          playerAttack: player.attack,
+          playerDefense: player.defense,
+          enemyKey: 'slime',
+        });
+      }
+    });
+
+    // Handle return from battle
+    this.events.on('wake', (_sys: Phaser.Scenes.Systems, data?: { playerHp?: number }) => {
+      if (data?.playerHp !== undefined) {
+        this.player.hp = data.playerHp;
+      }
+    });
+
     this.cameras.main.startFollow(this.player, true, 1, 1);
     this.cameras.main.setBounds(0, 0, this.map.widthInPixels, this.map.heightInPixels);
     this.cameras.main.setDeadzone(0, 0);

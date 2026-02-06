@@ -15,6 +15,9 @@ export class Boot extends Scene {
       frameWidth: 16,
       frameHeight: 16,
     });
+
+    // Enemy sprites
+    this.load.image('slime', 'assets/sprites/slime.png');
   }
 
   create(): void {

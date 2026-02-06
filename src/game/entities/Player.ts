@@ -1,7 +1,12 @@
 import { Scene, GameObjects } from 'phaser';
-import { Direction } from '../utils/Constants';
+import { Direction, PLAYER_DEFAULT_HP, PLAYER_DEFAULT_ATTACK, PLAYER_DEFAULT_DEFENSE } from '../utils/Constants';
 
 export class Player extends GameObjects.Sprite {
+  public hp: number = PLAYER_DEFAULT_HP;
+  public maxHp: number = PLAYER_DEFAULT_HP;
+  public attack: number = PLAYER_DEFAULT_ATTACK;
+  public defense: number = PLAYER_DEFAULT_DEFENSE;
+
   constructor(scene: Scene, x: number, y: number) {
     super(scene, x, y, 'player', 0);
     scene.add.existing(this);
@@ -76,5 +81,17 @@ export class Player extends GameObjects.Sprite {
   stopAnimation(direction: Direction): void {
     if (direction === Direction.NONE) return;
     this.anims.play(`idle-${direction}`, true);
+  }
+
+  takeDamage(amount: number): void {
+    this.hp = Math.max(0, this.hp - amount);
+  }
+
+  isAlive(): boolean {
+    return this.hp > 0;
+  }
+
+  resetStats(): void {
+    this.hp = this.maxHp;
   }
 }

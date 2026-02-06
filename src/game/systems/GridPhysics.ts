@@ -5,12 +5,17 @@ import { Player } from '../entities/Player';
 export class GridPhysics {
   private isMoving = false;
   private lastDirection = Direction.DOWN;
+  private onMoveComplete?: (tileX: number, tileY: number) => void;
 
   constructor(
     private player: Player,
     private wallsLayer: Phaser.Tilemaps.TilemapLayer,
     private scene: Scene
   ) {}
+
+  setOnMoveComplete(callback: (tileX: number, tileY: number) => void): void {
+    this.onMoveComplete = callback;
+  }
 
   update(cursors: Phaser.Types.Input.Keyboard.CursorKeys): void {
     if (this.isMoving) return;
@@ -48,6 +53,11 @@ export class GridPhysics {
       onComplete: () => {
         this.isMoving = false;
         this.player.stopAnimation(direction);
+        if (this.onMoveComplete) {
+          const tileX = Math.floor(this.player.x / TILE_SIZE);
+          const tileY = Math.floor(this.player.y / TILE_SIZE);
+          this.onMoveComplete(tileX, tileY);
+        }
       },
     });
   }

@@ -10,11 +10,11 @@
 
 | Attribute | Value |
 |-----------|-------|
-| **Current Phase** | Phase 1: Walking Demo — COMPLETE |
+| **Current Phase** | Phase 2: First Battle — COMPLETE |
 | **Phase Progress** | 100% (All 5 success criteria verified via Playwright) |
-| **Overall Progress** | Planning: 100% / Implementation: Phase 1 done |
+| **Overall Progress** | Planning: 100% / Implementation: Phase 2 done |
 | **Blockers** | None |
-| **Work Plan** | `.sisyphus/plans/phase1-walking-demo.md` |
+| **Work Plan** | `.sisyphus/plans/phase2-first-battle.md` |
 
 ---
 
@@ -27,13 +27,13 @@
 - [x] Add camera follow
 - [x] Implement wall collision
 
-### Phase 2: First Battle (4-6 hrs)
-- [ ] Create BattleScene with separate UI
-- [ ] Implement turn-based state machine
-- [ ] Create one enemy type
-- [ ] Implement Attack action
-- [ ] Battle end conditions (victory/defeat)
-- [ ] Return to world after battle
+### Phase 2: First Battle (4-6 hrs) — COMPLETE
+- [x] Create BattleScene with separate UI
+- [x] Implement turn-based state machine
+- [x] Create one enemy type (Slime)
+- [x] Implement Attack action
+- [x] Battle end conditions (victory/defeat)
+- [x] Return to world after battle
 
 ### Phase 3: Character Depth (4-5 hrs)
 - [ ] Title screen with New Game
@@ -158,6 +158,52 @@
 
 ---
 
+### Session 4 - Feb 6, 2026
+**Duration:** ~30 min  
+**Focus:** Phase 2 implementation (all 8 tasks)
+
+**Completed:**
+- [x] Task 1: Extended Constants.ts with BattleState enum + battle constants
+- [x] Task 2: Created 32x32 placeholder Slime sprite
+- [x] Task 3: Expanded tileset to 3 tiles, added encounters layer (3x3 zone at tiles 8,10-10,12)
+- [x] Task 4: Added HP/attack/defense stats to Player entity, loaded slime asset in Boot
+- [x] Task 5: Added onMoveComplete callback to GridPhysics for encounter detection
+- [x] Task 6: Implemented BattleSystem state machine (pure logic, no Phaser dependency)
+- [x] Task 7: Implemented BattleScene with HP bars, Attack menu, keyboard input, state-driven UI
+- [x] Task 8: Wired encounter detection in WorldScene, scene sleep/wake transitions, full integration QA
+
+**Verification Results (Playwright):**
+- [x] Walking into encounter zone triggers BattleScene
+- [x] Battle UI shows player HP, enemy HP, Attack option
+- [x] Selecting Attack deals damage to enemy
+- [x] Enemy attacks on its turn
+- [x] Battle ends when enemy HP = 0 → victory → return to world
+
+**Key Files Created/Modified:**
+- `src/game/utils/Constants.ts` — BattleState enum, battle constants
+- `src/game/data/enemies.ts` — EnemyData interface + Slime definition
+- `src/game/entities/Player.ts` — HP/attack/defense stats + takeDamage/isAlive/resetStats
+- `src/game/systems/GridPhysics.ts` — onMoveComplete callback
+- `src/game/systems/BattleSystem.ts` — Turn-based state machine (pure logic)
+- `src/game/scenes/BattleScene.ts` — Battle UI with HP bars + keyboard input
+- `src/game/scenes/WorldScene.ts` — Encounter detection + scene sleep/wake
+- `public/assets/sprites/slime.png` — 32x32 placeholder enemy sprite
+- `public/assets/maps/tiles.png` — Expanded tileset (3 tiles)
+- `public/assets/maps/test-map.json` — Added encounters layer
+
+**Architecture Decisions:**
+- Scene sleep/wake pattern preserves world position during battle
+- BattleSystem is pure logic (no Phaser imports) — testable in isolation
+- Encounter zones via invisible tilemap layer (opacity 0)
+- Damage formula: `max(1, atk - def/2 + rand(1,3))`
+- Player stats: HP=20, ATK=8, DEF=4. Slime: HP=12, ATK=5, DEF=2
+
+**Next Session:**
+- Begin Phase 3: Character Depth
+- Title screen, character creation, classes, XP/leveling
+
+---
+
 ## Quick Reference
 
 ### Key Commands
@@ -175,7 +221,8 @@ npm run build
 | `.planning/ROADMAP.md` | Phase breakdown with success criteria |
 | `.planning/REQUIREMENTS.md` | Requirement traceability matrix |
 | `.planning/PROGRESS.md` | **THIS FILE** - Session continuity tracker |
-| `.sisyphus/plans/phase1-walking-demo.md` | **CURRENT WORK PLAN** - Detailed task breakdown |
+| `.sisyphus/plans/phase1-walking-demo.md` | Phase 1 work plan |
+| `.sisyphus/plans/phase2-first-battle.md` | Phase 2 work plan |
 | `docs/01_discovery.md` | PRD with all requirements |
 
 ### Resources
@@ -193,4 +240,4 @@ npm run build
 
 ---
 
-*Last Updated: Feb 6, 2026 09:30 AM*
+*Last Updated: Feb 6, 2026 12:00 PM*

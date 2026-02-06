@@ -939,17 +939,6 @@
       "y": 0
     }
   ],
-      "height": 20,
-      "width": 20,
-      "id": 3,
-      "name": "encounters",
-      "type": "tilelayer",
-      "visible": true,
-      "opacity": 0,
-      "x": 0,
-      "y": 0
-    }
-  ],
   "tilesets": [
     {
       "columns": 3,

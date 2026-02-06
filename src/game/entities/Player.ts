@@ -1,15 +1,39 @@
 import { Scene, GameObjects } from 'phaser';
 import { Direction, PLAYER_DEFAULT_HP, PLAYER_DEFAULT_ATTACK, PLAYER_DEFAULT_DEFENSE } from '../utils/Constants';
+import { CLASSES } from '../data/classes';
+import { statsAtLevel } from '../data/xp';
+
+export interface PlayerConfig {
+  name: string;
+  classKey: string;
+}
 
 export class Player extends GameObjects.Sprite {
   public hp: number = PLAYER_DEFAULT_HP;
   public maxHp: number = PLAYER_DEFAULT_HP;
   public attack: number = PLAYER_DEFAULT_ATTACK;
   public defense: number = PLAYER_DEFAULT_DEFENSE;
+  public name: string = 'Player';
+  public classKey: string = 'warrior';
+  public level: number = 1;
+  public xp: number = 0;
 
-  constructor(scene: Scene, x: number, y: number) {
+  constructor(scene: Scene, x: number, y: number, config?: PlayerConfig) {
     super(scene, x, y, 'player', 0);
     scene.add.existing(this);
+    if (config) {
+      this.name = config.name;
+      this.classKey = config.classKey;
+      const classData = CLASSES[config.classKey];
+      const stats = statsAtLevel(classData, this.level);
+      this.hp = stats.hp;
+      this.maxHp = stats.hp;
+      this.attack = stats.attack;
+      this.defense = stats.defense;
+    } else {
+      this.name = 'Player';
+      this.classKey = 'warrior';
+    }
     this.createAnimations();
   }
 
@@ -93,5 +117,17 @@ export class Player extends GameObjects.Sprite {
 
   resetStats(): void {
     this.hp = this.maxHp;
+  }
+
+  applyLevelUp(newLevel: number): void {
+    const classData = CLASSES[this.classKey];
+    const oldStats = statsAtLevel(classData, this.level);
+    const newStats = statsAtLevel(classData, newLevel);
+    const hpGain = newStats.hp - oldStats.hp;
+    this.hp += hpGain;
+    this.maxHp = newStats.hp;
+    this.attack = newStats.attack;
+    this.defense = newStats.defense;
+    this.level = newLevel;
   }
 }

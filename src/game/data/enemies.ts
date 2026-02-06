@@ -5,6 +5,7 @@ export interface EnemyData {
   attack: number;
   defense: number;
   spriteKey: string;
+  xpReward: number;
 }
 
 export const ENEMIES: Record<string, EnemyData> = {
@@ -15,5 +16,6 @@ export const ENEMIES: Record<string, EnemyData> = {
     attack: 5,
     defense: 2,
     spriteKey: 'slime',
+    xpReward: 15,
   },
 };

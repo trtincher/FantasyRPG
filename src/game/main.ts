@@ -1,4 +1,6 @@
 import { Boot } from './scenes/Boot';
+import { TitleScene } from './scenes/TitleScene';
+import { CharacterCreationScene } from './scenes/CharacterCreationScene';
 import { WorldScene } from './scenes/WorldScene';
 import { BattleScene } from './scenes/BattleScene';
 import { AUTO, Game } from 'phaser';
@@ -15,6 +17,8 @@ const config: Phaser.Types.Core.GameConfig = {
     backgroundColor: '#1a1a2e',
     scene: [
         Boot,
+        TitleScene,
+        CharacterCreationScene,
         WorldScene,
         BattleScene,
     ]

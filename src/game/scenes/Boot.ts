@@ -21,6 +21,6 @@ export class Boot extends Scene {
   }
 
   create(): void {
-    this.scene.start('WorldScene');
+    this.scene.start('TitleScene');
   }
 }

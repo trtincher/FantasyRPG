@@ -17,6 +17,7 @@ interface BattleInitData {
   encounterId: string;
   playerName: string;
   playerLevel: number;
+  isBoss: boolean;
 }
 
 export class BattleScene extends Scene {
@@ -225,13 +226,17 @@ export class BattleScene extends Scene {
   private onBattleEnd(result: 'victory' | 'defeat'): void {
     if (result === 'victory') {
       this.time.delayedCall(2000, () => {
-        this.scene.wake('WorldScene', {
-          playerHp: this.battleSystem.getPlayerHp(),
-          encounterId: this.initData.encounterId,
-          result: 'victory',
-          xpGained: ENEMIES[this.initData.enemyKey].xpReward,
-        });
-        this.scene.stop('BattleScene');
+        if (this.initData.isBoss) {
+          this.scene.start('VictoryScene');
+        } else {
+          this.scene.wake('WorldScene', {
+            playerHp: this.battleSystem.getPlayerHp(),
+            encounterId: this.initData.encounterId,
+            result: 'victory',
+            xpGained: ENEMIES[this.initData.enemyKey].xpReward,
+          });
+          this.scene.stop('BattleScene');
+        }
       });
     } else {
       this.time.delayedCall(2000, () => {

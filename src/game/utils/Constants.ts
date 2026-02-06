@@ -32,4 +32,20 @@ export enum BattleState {
   CHECK_END = 'check_end',
   VICTORY = 'victory',
   DEFEAT = 'defeat',
+  FLED = 'fled',
 }
+
+export const SAVE_KEY = 'fantasyrpg-save';
+
+export const REGISTRY_KEYS = [
+  'playerName',
+  'playerClass',
+  'playerLevel',
+  'playerXp',
+  'playerInventory',
+  'playerTileX',
+  'playerTileY',
+  'defeatedEncounters',
+  'triggeredStoryEvents',
+  'collectedPickups',
+] as const;

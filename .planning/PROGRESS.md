@@ -10,11 +10,11 @@
 
 | Attribute | Value |
 |-----------|-------|
-| **Current Phase** | Phase 4: World Expansion — COMPLETE |
-| **Phase Progress** | 100% (All success criteria met, 110 tests passing) |
-| **Overall Progress** | Planning: 100% / Implementation: Phase 4 done |
+| **Current Phase** | Phase 5: Systems & Polish — COMPLETE |
+| **Phase Progress** | 100% (All 10 tasks done, 161 tests passing, build clean) |
+| **Overall Progress** | Planning: 100% / Implementation: Phase 5 done |
 | **Blockers** | None |
-| **Work Plan** | `.sisyphus/plans/phase4-world-expansion.md` |
+| **Work Plan** | `.sisyphus/plans/phase5-systems-polish.md` |
 
 ---
 
@@ -49,13 +49,15 @@
 - [x] Story beats — 3 walk-over trigger zones
 - [x] Boss encounter — Dark Knight in boss room, VictoryScene on defeat
 
-### Phase 5: Systems & Polish (6-8 hrs)
-- [ ] Inventory system
-- [ ] Full battle actions (Defend, Item, Flee)
-- [ ] Save/Load game
-- [ ] Background music
-- [ ] Sound effects
-- [ ] Polished menu UI
+### Phase 5: Systems & Polish (6-8 hrs) — COMPLETE
+- [x] Inventory system (Potion, Hi-Potion, helper utilities)
+- [x] Full battle actions (Attack/Defend/Item/Flee with arrow-key menu)
+- [x] Save/Load game (localStorage, Continue on TitleScene)
+- [x] Pause menu (Escape key, stats/inventory/save/use item)
+- [x] Potion pickups on world map (5 spawns, tracked in save)
+- [x] Save-aware spawn position
+- [ ] Background music (deferred)
+- [ ] Sound effects (deferred)
 
 ---
 
@@ -267,6 +269,56 @@
 
 ---
 
+### Session 7 - Feb 6, 2026
+**Duration:** ~45 min
+**Focus:** Phase 5 implementation (systems & polish)
+
+**Completed:**
+- [x] Item data file: Potion (heals 15 HP) and Hi-Potion (heals 40 HP)
+- [x] Inventory utilities: addItem, removeItem, getItemCount, hasItem, serialize/deserialize
+- [x] Constants expanded: BattleState.FLED, SAVE_KEY, REGISTRY_KEYS array
+- [x] BattleSystem expanded: playerDefend() (halves damage), playerUseItem(), playerFlee() (50% chance, boss blocked)
+- [x] SaveSystem: createSaveData, saveGame, loadGame, hasSaveData, deleteSaveData (localStorage)
+- [x] Registry cleanup refactor: TitleScene/VictoryScene use REGISTRY_KEYS loop, CharCreation sets starting inventory
+- [x] BattleScene rewrite: 4-option arrow-key menu (Attack/Defend/Item/Flee), item sub-menu, flee/heal callbacks
+- [x] PauseMenu system: Escape overlay with stats, inventory, Use Item, Save Game, Close
+- [x] TitleScene: Continue option with arrow-key selection, loads save into registry
+- [x] WorldScene integration: pause menu, potion pickups (5 spawns), save-aware spawn, flee handling, registry persistence
+- [x] Boot.ts: loads potion sprite
+- [x] 161 tests passing across 10 files, build clean
+
+**Key Files Created:**
+- `src/game/data/items.ts` — ItemData interface, Potion + Hi-Potion
+- `src/game/utils/inventory.ts` — Pure inventory helper functions
+- `src/game/systems/SaveSystem.ts` — localStorage save/load with schema validation
+- `src/game/systems/PauseMenu.ts` — Pause overlay system
+- `public/assets/sprites/potion.png` — 16x16 potion sprite
+- Tests: `items.test.ts`, `inventory.test.ts`, `SaveSystem.test.ts`
+
+**Key Files Modified:**
+- `src/game/utils/Constants.ts` — FLED, SAVE_KEY, REGISTRY_KEYS
+- `src/game/systems/BattleSystem.ts` — defend/item/flee actions
+- `src/game/scenes/BattleScene.ts` — 4-option menu + item sub-menu
+- `src/game/scenes/TitleScene.ts` — Continue option + registry cleanup
+- `src/game/scenes/VictoryScene.ts` — REGISTRY_KEYS cleanup
+- `src/game/scenes/CharacterCreationScene.ts` — Starting inventory
+- `src/game/scenes/WorldScene.ts` — Full integration (pickups, pause, save-aware spawn, flee)
+- `src/game/scenes/Boot.ts` — Potion sprite loading
+
+**Architecture Decisions:**
+- Audio explicitly deferred (no music, no sound effects)
+- Single localStorage save slot, manual save only from pause menu
+- PauseMenu is a WorldScene overlay (not separate scene), similar to DialogueSystem
+- BattleSystem stays pure (no Phaser imports) for testability
+- Inventory stored as JSON string in Phaser registry
+- Potion pickups tracked in collectedPickups Set, persisted in save data
+
+**Next Session:**
+- Begin Phase 6: Final Polish (if applicable per ROADMAP.md)
+- Or: Create PR for Phase 5
+
+---
+
 ## Quick Reference
 
 ### Key Commands
@@ -288,6 +340,7 @@ npm run build
 | `.sisyphus/plans/phase2-first-battle.md` | Phase 2 work plan |
 | `.sisyphus/plans/phase3-character-depth.md` | Phase 3 work plan |
 | `.sisyphus/plans/phase4-world-expansion.md` | Phase 4 work plan |
+| `.sisyphus/plans/phase5-systems-polish.md` | Phase 5 work plan |
 | `docs/01_discovery.md` | PRD with all requirements |
 
 ### Resources
@@ -305,4 +358,4 @@ npm run build
 
 ---
 
-*Last Updated: Feb 6, 2026 3:37 PM*
+*Last Updated: Feb 6, 2026 4:25 PM*

@@ -1,4 +1,5 @@
 import { Scene } from 'phaser';
+import { REGISTRY_KEYS } from '../utils/Constants';
 
 export class VictoryScene extends Scene {
   constructor() {
@@ -6,10 +7,9 @@ export class VictoryScene extends Scene {
   }
 
   create(): void {
-    this.game.registry.remove('playerName');
-    this.game.registry.remove('playerClass');
-    this.game.registry.remove('playerLevel');
-    this.game.registry.remove('playerXp');
+    for (const key of REGISTRY_KEYS) {
+      this.game.registry.remove(key);
+    }
 
     this.cameras.main.setBackgroundColor(0x1a2e1a);
 

@@ -4,7 +4,9 @@ import { EnemyData } from '../data/enemies';
 export interface BattleCallbacks {
   onStateChange: (state: BattleState) => void;
   onDamageDealt: (target: 'player' | 'enemy', damage: number, remainingHp: number) => void;
-  onBattleEnd: (result: 'victory' | 'defeat') => void;
+  onBattleEnd: (result: 'victory' | 'defeat' | 'fled') => void;
+  onHeal?: (amount: number, newHp: number) => void;
+  onFleeAttempt?: (success: boolean) => void;
 }
 
 export class BattleSystem {
@@ -19,11 +21,14 @@ export class BattleSystem {
   private enemyDef: number;
   private enemyName: string;
   private callbacks: BattleCallbacks;
+  private isDefending = false;
+  private isBoss: boolean;
 
   constructor(
     playerStats: { hp: number; maxHp: number; attack: number; defense: number },
     enemyData: EnemyData,
-    callbacks: BattleCallbacks
+    callbacks: BattleCallbacks,
+    isBoss: boolean = false
   ) {
     this.playerHp = playerStats.hp;
     this.playerMaxHp = playerStats.maxHp;
@@ -35,6 +40,7 @@ export class BattleSystem {
     this.enemyDef = enemyData.defense;
     this.enemyName = enemyData.name;
     this.callbacks = callbacks;
+    this.isBoss = isBoss;
   }
 
   start(): void {
@@ -64,7 +70,11 @@ export class BattleSystem {
   enemyTurn(): void {
     if (this.state !== BattleState.ENEMY_TURN) return;
 
-    const damage = this.calculateDamage(this.enemyAtk, this.playerDef);
+    let damage = this.calculateDamage(this.enemyAtk, this.playerDef);
+    if (this.isDefending) {
+      damage = Math.max(1, Math.floor(damage / 2));
+      this.isDefending = false;
+    }
     this.playerHp = Math.max(0, this.playerHp - damage);
     this.callbacks.onDamageDealt('player', damage, this.playerHp);
 
@@ -84,6 +94,7 @@ export class BattleSystem {
       this.callbacks.onStateChange(this.state);
       this.callbacks.onBattleEnd('defeat');
     } else {
+      this.isDefending = false;
       this.state = BattleState.PLAYER_TURN;
       this.callbacks.onStateChange(this.state);
     }
@@ -92,6 +103,39 @@ export class BattleSystem {
   private calculateDamage(atk: number, def: number): number {
     const baseDamage = atk - def / 2 + Math.floor(Math.random() * 3) + 1;
     return Math.max(MIN_DAMAGE, Math.floor(baseDamage));
+  }
+
+  playerDefend(): void {
+    if (this.state !== BattleState.PLAYER_TURN) return;
+    this.isDefending = true;
+    this.state = BattleState.ENEMY_TURN;
+    this.callbacks.onStateChange(this.state);
+  }
+
+  playerUseItem(healAmount: number): void {
+    if (this.state !== BattleState.PLAYER_TURN) return;
+    this.playerHp = Math.min(this.playerMaxHp, this.playerHp + healAmount);
+    this.callbacks.onHeal?.(healAmount, this.playerHp);
+    this.state = BattleState.ENEMY_TURN;
+    this.callbacks.onStateChange(this.state);
+  }
+
+  playerFlee(): 'success' | 'failed' | 'blocked' {
+    if (this.state !== BattleState.PLAYER_TURN) return 'failed';
+    if (this.isBoss) {
+      this.callbacks.onFleeAttempt?.(false);
+      return 'blocked';
+    }
+    if (Math.random() < 0.5) {
+      this.state = BattleState.FLED;
+      this.callbacks.onStateChange(this.state);
+      this.callbacks.onBattleEnd('fled');
+      return 'success';
+    }
+    this.callbacks.onFleeAttempt?.(false);
+    this.state = BattleState.ENEMY_TURN;
+    this.callbacks.onStateChange(this.state);
+    return 'failed';
   }
 
   getState(): BattleState {

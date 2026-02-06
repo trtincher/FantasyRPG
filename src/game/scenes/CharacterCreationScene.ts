@@ -1,5 +1,6 @@
 import { Scene } from 'phaser';
 import { CLASSES, CLASS_KEYS } from '../data/classes';
+import { createStartingInventory, serializeInventory } from '../utils/inventory';
 
 export class CharacterCreationScene extends Scene {
   private step: 'name' | 'class' = 'name';
@@ -161,6 +162,7 @@ export class CharacterCreationScene extends Scene {
       this.game.registry.set('playerClass', CLASS_KEYS[this.selectedIndex]);
       this.game.registry.set('playerLevel', 1);
       this.game.registry.set('playerXp', 0);
+      this.game.registry.set('playerInventory', serializeInventory(createStartingInventory()));
       this.scene.start('WorldScene');
     } else if (event.key === 'Escape') {
       this.step = 'name';

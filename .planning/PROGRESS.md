@@ -10,11 +10,11 @@
 
 | Attribute | Value |
 |-----------|-------|
-| **Current Phase** | Phase 2: First Battle — COMPLETE |
-| **Phase Progress** | 100% (All 5 success criteria verified via Playwright) |
-| **Overall Progress** | Planning: 100% / Implementation: Phase 2 done |
+| **Current Phase** | Phase 4: World Expansion — COMPLETE |
+| **Phase Progress** | 100% (All success criteria met, 110 tests passing) |
+| **Overall Progress** | Planning: 100% / Implementation: Phase 4 done |
 | **Blockers** | None |
-| **Work Plan** | `.sisyphus/plans/phase2-first-battle.md` |
+| **Work Plan** | `.sisyphus/plans/phase4-world-expansion.md` |
 
 ---
 
@@ -35,19 +35,19 @@
 - [x] Battle end conditions (victory/defeat)
 - [x] Return to world after battle
 
-### Phase 3: Character Depth (4-5 hrs)
-- [ ] Title screen with New Game
-- [ ] Character creation (name + class)
-- [ ] 3 classes with different stats
-- [ ] XP gain after victory
-- [ ] Level up system
+### Phase 3: Character Depth (4-5 hrs) — COMPLETE
+- [x] Title screen with New Game
+- [x] Character creation (name + class)
+- [x] 3 classes with different stats
+- [x] XP gain after victory
+- [x] Level up system
 
-### Phase 4: World Expansion (6-8 hrs)
-- [ ] Full dungeon map (~15 min content)
-- [ ] 3+ enemy types
-- [ ] NPCs with dialogue
-- [ ] Story beats
-- [ ] Boss encounter
+### Phase 4: World Expansion (6-8 hrs) — COMPLETE
+- [x] Full dungeon map (~15 min content) — 50x40 tile dungeon with 5 rooms
+- [x] 3+ enemy types — Rat, Bat, Skeleton + existing Slime (4 types + boss)
+- [x] NPCs with dialogue — 3 NPCs (Old Man, Guard, Ghost)
+- [x] Story beats — 3 walk-over trigger zones
+- [x] Boss encounter — Dark Knight in boss room, VictoryScene on defeat
 
 ### Phase 5: Systems & Polish (6-8 hrs)
 - [ ] Inventory system
@@ -204,6 +204,69 @@
 
 ---
 
+### Session 5 - Feb 6, 2026
+**Duration:** ~30 min
+**Focus:** Phase 3 implementation (character depth)
+
+**Completed:**
+- [x] TitleScene with "New Game" option, Enter/Space to start
+- [x] CharacterCreationScene with name input (A-Z, 1-8 chars) + class selection
+- [x] 3 classes: Warrior (30/12/8), Mage (20/15/4), Rogue (25/10/6)
+- [x] XP/leveling system (MAX_LEVEL=10, formula: (level+1)*25)
+- [x] Player entity extended with name, classKey, level, xp
+- [x] Battle shows player name/level, awards XP on victory
+- [x] Defeat returns to TitleScene
+- [x] 50 tests passing across 5 files
+
+**Key Files Created:**
+- `src/game/scenes/TitleScene.ts`, `CharacterCreationScene.ts`
+- `src/game/data/classes.ts`, `xp.ts`
+- Tests: `classes.test.ts`, `xp.test.ts`
+
+---
+
+### Session 6 - Feb 6, 2026
+**Duration:** ~20 min
+**Focus:** Phase 4 implementation (world expansion)
+
+**Completed:**
+- [x] 50x40 multi-room dungeon map (5 rooms + corridors)
+- [x] Expanded tileset (6 tiles: grass, wall, stone, cracked, corridor, boss)
+- [x] 4 enemy types + boss: Rat (8/6/1), Bat (10/7/3), Skeleton (20/9/5), Dark Knight boss (50/14/8)
+- [x] 5 placeholder sprites (rat, bat, skeleton, dark-knight, npc)
+- [x] DialogueSystem with text box overlay (Enter/Space to advance)
+- [x] 3 NPCs (Old Man, Guard, Ghost) with face-and-interact mechanic
+- [x] 3 story trigger zones (entrance, midpoint, boss door) - one-time fire
+- [x] VictoryScene after boss defeat
+- [x] Boss routing: victory -> VictoryScene, all defeats -> TitleScene
+- [x] 13 encounters across dungeon rooms + corridors
+- [x] Movement blocked during dialogue
+- [x] 110 tests passing across 7 files
+
+**Key Files Created:**
+- `src/game/scenes/VictoryScene.ts`
+- `src/game/systems/DialogueSystem.ts`
+- `src/game/entities/NPC.ts`
+- `src/game/data/dialogues.ts`, `story.ts`
+- `public/assets/maps/dungeon.json` (replaces test-map.json)
+- `public/assets/maps/tiles.png` (expanded to 6 tiles)
+- `public/assets/sprites/rat.png`, `bat.png`, `skeleton.png`, `dark-knight.png`, `npc.png`
+- Tests: `dialogues.test.ts`, `story.test.ts`
+
+**Architecture Decisions:**
+- Single continuous map (no scene transitions between rooms)
+- DialogueSystem is a WorldScene overlay (not separate scene)
+- NPCs are static images, interaction via facing direction + Enter/Space
+- Story triggers are invisible walk-over zones tracked in a Set
+- Boss victory routes to VictoryScene instead of waking WorldScene
+- Enemy sprite loaded via ENEMIES[key].spriteKey for proper asset mapping
+
+**Next Session:**
+- Begin Phase 5: Systems & Polish
+- Inventory, Defend/Item/Flee actions, Save/Load, Audio
+
+---
+
 ## Quick Reference
 
 ### Key Commands
@@ -223,6 +286,8 @@ npm run build
 | `.planning/PROGRESS.md` | **THIS FILE** - Session continuity tracker |
 | `.sisyphus/plans/phase1-walking-demo.md` | Phase 1 work plan |
 | `.sisyphus/plans/phase2-first-battle.md` | Phase 2 work plan |
+| `.sisyphus/plans/phase3-character-depth.md` | Phase 3 work plan |
+| `.sisyphus/plans/phase4-world-expansion.md` | Phase 4 work plan |
 | `docs/01_discovery.md` | PRD with all requirements |
 
 ### Resources
@@ -240,4 +305,4 @@ npm run build
 
 ---
 
-*Last Updated: Feb 6, 2026 12:00 PM*
+*Last Updated: Feb 6, 2026 3:37 PM*

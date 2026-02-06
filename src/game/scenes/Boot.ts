@@ -6,18 +6,20 @@ export class Boot extends Scene {
   }
 
   preload(): void {
-    // Tilemap
-    this.load.tilemapTiledJSON('test-map', 'assets/maps/test-map.json');
+    this.load.tilemapTiledJSON('dungeon', 'assets/maps/dungeon.json');
     this.load.image('tiles', 'assets/maps/tiles.png');
 
-    // Player spritesheet
     this.load.spritesheet('player', 'assets/sprites/player.png', {
       frameWidth: 16,
       frameHeight: 16,
     });
 
-    // Enemy sprites
     this.load.image('slime', 'assets/sprites/slime.png');
+    this.load.image('rat', 'assets/sprites/rat.png');
+    this.load.image('bat', 'assets/sprites/bat.png');
+    this.load.image('skeleton', 'assets/sprites/skeleton.png');
+    this.load.image('dark-knight', 'assets/sprites/dark-knight.png');
+    this.load.image('npc', 'assets/sprites/npc.png');
   }
 
   create(): void {

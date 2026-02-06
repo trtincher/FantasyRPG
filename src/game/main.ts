@@ -3,6 +3,7 @@ import { TitleScene } from './scenes/TitleScene';
 import { CharacterCreationScene } from './scenes/CharacterCreationScene';
 import { WorldScene } from './scenes/WorldScene';
 import { BattleScene } from './scenes/BattleScene';
+import { VictoryScene } from './scenes/VictoryScene';
 import { AUTO, Game } from 'phaser';
 import { CANVAS_WIDTH, CANVAS_HEIGHT, ZOOM } from './utils/Constants';
 
@@ -21,6 +22,7 @@ const config: Phaser.Types.Core.GameConfig = {
         CharacterCreationScene,
         WorldScene,
         BattleScene,
+        VictoryScene,
     ]
 };
 

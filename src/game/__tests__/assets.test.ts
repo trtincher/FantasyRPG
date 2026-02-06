@@ -106,4 +106,24 @@ describe('sprite assets', () => {
   it('slime sprite exists', () => {
     expect(existsSync(join(SPRITES_DIR, 'slime.png'))).toBe(true);
   });
+
+  it('rat sprite exists', () => {
+    expect(existsSync(join(SPRITES_DIR, 'rat.png'))).toBe(true);
+  });
+
+  it('bat sprite exists', () => {
+    expect(existsSync(join(SPRITES_DIR, 'bat.png'))).toBe(true);
+  });
+
+  it('skeleton sprite exists', () => {
+    expect(existsSync(join(SPRITES_DIR, 'skeleton.png'))).toBe(true);
+  });
+
+  it('dark-knight sprite exists', () => {
+    expect(existsSync(join(SPRITES_DIR, 'dark-knight.png'))).toBe(true);
+  });
+
+  it('npc sprite exists', () => {
+    expect(existsSync(join(SPRITES_DIR, 'npc.png'))).toBe(true);
+  });
 });

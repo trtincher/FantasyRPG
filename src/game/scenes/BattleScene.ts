@@ -14,6 +14,7 @@ interface BattleInitData {
   playerAttack: number;
   playerDefense: number;
   enemyKey: string;
+  encounterId: string;
 }
 
 export class BattleScene extends Scene {
@@ -225,6 +226,8 @@ export class BattleScene extends Scene {
       this.time.delayedCall(2000, () => {
         this.scene.wake('WorldScene', {
           playerHp: this.battleSystem.getPlayerHp(),
+          encounterId: this.initData.encounterId,
+          result: 'victory',
         });
         this.scene.stop('BattleScene');
       });

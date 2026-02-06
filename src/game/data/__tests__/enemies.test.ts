@@ -20,10 +20,14 @@ describe('enemy data', () => {
         expect(enemy.key).toBe(key);
       });
 
-      it('has non-empty name and spriteKey', () => {
-        expect(enemy.name.length).toBeGreaterThan(0);
-        expect(enemy.spriteKey.length).toBeGreaterThan(0);
-      });
-    });
-  });
-});
+       it('has non-empty name and spriteKey', () => {
+         expect(enemy.name.length).toBeGreaterThan(0);
+         expect(enemy.spriteKey.length).toBeGreaterThan(0);
+       });
+
+       it('has positive xpReward', () => {
+         expect(enemy.xpReward).toBeGreaterThan(0);
+       });
+     });
+   });
+ });

@@ -2,6 +2,7 @@ import { Scene } from 'phaser';
 import { TILE_SIZE, PLAYER_SPAWN_X, PLAYER_SPAWN_Y } from '../utils/Constants';
 import { Player } from '../entities/Player';
 import { GridPhysics } from '../systems/GridPhysics';
+import { processXpGain } from '../data/xp';
 
 interface EncounterSpawn {
   id: string;
@@ -73,7 +74,22 @@ export class WorldScene extends Scene {
     // Create player sprite at spawn position (convert tile coords to pixel coords)
     const spawnX = PLAYER_SPAWN_X * TILE_SIZE + TILE_SIZE / 2;
     const spawnY = PLAYER_SPAWN_Y * TILE_SIZE + TILE_SIZE / 2;
-    this.player = new Player(this, spawnX, spawnY);
+
+    const playerName = this.game.registry.get('playerName') || 'Player';
+    const playerClass = this.game.registry.get('playerClass') || 'warrior';
+    const playerLevel = this.game.registry.get('playerLevel') || 1;
+    const playerXp = this.game.registry.get('playerXp') || 0;
+
+    this.player = new Player(this, spawnX, spawnY, {
+      name: playerName,
+      classKey: playerClass,
+    });
+    this.player.level = playerLevel;
+    this.player.xp = playerXp;
+
+    if (playerLevel > 1) {
+      this.player.applyLevelUp(playerLevel);
+    }
 
     if (this.input.keyboard) {
       this.cursors = this.input.keyboard.createCursorKeys();
@@ -92,6 +108,8 @@ export class WorldScene extends Scene {
         const player = this.getPlayer();
         this.scene.sleep('WorldScene');
         this.scene.launch('BattleScene', {
+          playerName: player.name,
+          playerLevel: player.level,
           playerHp: player.hp,
           playerMaxHp: player.maxHp,
           playerAttack: player.attack,
@@ -103,9 +121,21 @@ export class WorldScene extends Scene {
     });
 
     // Handle return from battle
-    this.events.on('wake', (_sys: Phaser.Scenes.Systems, data?: { playerHp?: number; encounterId?: string; result?: string }) => {
+    this.events.on('wake', (_sys: Phaser.Scenes.Systems, data?: { playerHp?: number; encounterId?: string; result?: string; xpGained?: number }) => {
       if (data?.playerHp !== undefined) {
         this.player.hp = data.playerHp;
+      }
+
+      if (data?.result === 'victory' && data?.xpGained) {
+        const result = processXpGain(this.player.level, this.player.xp, data.xpGained);
+        this.player.xp = result.newXp;
+
+        if (result.levelsGained > 0) {
+          this.player.applyLevelUp(result.newLevel);
+        }
+
+        this.game.registry.set('playerLevel', this.player.level);
+        this.game.registry.set('playerXp', this.player.xp);
       }
 
       if (data?.result === 'victory' && data?.encounterId) {

@@ -15,6 +15,8 @@ interface BattleInitData {
   playerDefense: number;
   enemyKey: string;
   encounterId: string;
+  playerName: string;
+  playerLevel: number;
 }
 
 export class BattleScene extends Scene {
@@ -79,7 +81,7 @@ export class BattleScene extends Scene {
       wordWrap: { width: 300 },
     });
 
-    this.playerLabel = this.add.text(10, 170, 'Player', {
+    this.playerLabel = this.add.text(10, 170, `${this.initData.playerName} Lv.${this.initData.playerLevel}`, {
       fontSize: '12px',
       color: '#ffffff',
     });
@@ -167,7 +169,8 @@ export class BattleScene extends Scene {
         break;
 
       case BattleState.VICTORY:
-        this.messageText.setText('Victory!');
+        const xpGained = ENEMIES[this.initData.enemyKey].xpReward;
+        this.messageText.setText(`Victory! +${xpGained} XP`);
         this.menuText.setText('');
         break;
 
@@ -226,12 +229,13 @@ export class BattleScene extends Scene {
           playerHp: this.battleSystem.getPlayerHp(),
           encounterId: this.initData.encounterId,
           result: 'victory',
+          xpGained: ENEMIES[this.initData.enemyKey].xpReward,
         });
         this.scene.stop('BattleScene');
       });
     } else {
       this.time.delayedCall(2000, () => {
-        this.scene.start('Boot');
+        this.scene.start('TitleScene');
       });
     }
   }

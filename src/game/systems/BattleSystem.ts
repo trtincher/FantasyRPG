@@ -42,6 +42,12 @@ export class BattleSystem {
     this.callbacks.onStateChange(this.state);
   }
 
+  beginPlayerTurn(): void {
+    if (this.state !== BattleState.INTRO) return;
+    this.state = BattleState.PLAYER_TURN;
+    this.callbacks.onStateChange(this.state);
+  }
+
   playerAttack(): number {
     if (this.state !== BattleState.PLAYER_TURN) return 0;
 

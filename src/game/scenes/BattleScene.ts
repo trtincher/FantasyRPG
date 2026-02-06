@@ -145,9 +145,7 @@ export class BattleScene extends Scene {
         );
         this.menuText.setText('');
         this.time.delayedCall(1500, () => {
-          this.battleSystem['state'] = BattleState.PLAYER_TURN;
-          this.currentState = BattleState.PLAYER_TURN;
-          this.showPlayerTurn();
+          this.battleSystem.beginPlayerTurn();
         });
         break;
 

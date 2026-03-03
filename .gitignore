@@ -9,6 +9,7 @@ lerna-debug.log*
 
 node_modules
 .opencode/node_modules
+.opencode/sessions
 dist
 dist-ssr
 *.local

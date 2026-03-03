@@ -10,6 +10,7 @@ export class DialogueSystem {
   private background?: Phaser.GameObjects.Graphics;
   private speakerText?: Phaser.GameObjects.Text;
   private bodyText?: Phaser.GameObjects.Text;
+  private hintText?: Phaser.GameObjects.Text;
 
   constructor(scene: Scene) {
     this.scene = scene;
@@ -54,6 +55,10 @@ export class DialogueSystem {
       this.bodyText.destroy();
       this.bodyText = undefined;
     }
+    if (this.hintText) {
+      this.hintText.destroy();
+      this.hintText = undefined;
+    }
   }
 
   getIsActive(): boolean {
@@ -96,5 +101,17 @@ export class DialogueSystem {
       wordWrap: { width: CANVAS_WIDTH - 16 },
     });
     this.bodyText.setDepth(1001);
+
+    if (this.hintText) {
+      this.hintText.destroy();
+    }
+    const isLast = this.lineIndex >= this.currentLines.length - 1;
+    const hintLabel = isLast ? 'Press Enter to Close' : 'Press Enter';
+    this.hintText = this.scene.add.text(
+      boxX + CANVAS_WIDTH - 8,
+      boxY + boxHeight - 12,
+      hintLabel,
+      { fontSize: '7px', color: '#888888' }
+    ).setOrigin(1, 0.5).setDepth(1001);
   }
 }

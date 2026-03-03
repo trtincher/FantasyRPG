@@ -65,10 +65,11 @@ describe('BattleSystem', () => {
       expect(callbacks.onDamageDealt).not.toHaveBeenCalled();
     });
 
-    it('transitions PLAYER_TURN → ENEMY_TURN on playerAttack', () => {
+    it('transitions PLAYER_TURN → ENEMY_TURN on playerAttack when enemy survives', () => {
       battle.start();
       battle.beginPlayerTurn();
       battle.playerAttack();
+      // Default slime (12 HP) survives one hit from default player (8 ATK)
       expect(battle.getState()).toBe(BattleState.ENEMY_TURN);
     });
 
@@ -84,6 +85,57 @@ describe('BattleSystem', () => {
       battle.start();
       battle.enemyTurn();
       expect(callbacks.onDamageDealt).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('player initiative', () => {
+    it('skips enemy turn when killing blow is dealt (CHECK_END, not ENEMY_TURN)', () => {
+      const cb = makeCallbacks();
+      const strong = new BattleSystem(
+        { hp: 20, maxHp: 20, attack: 999, defense: 999 },
+        ENEMIES.slime,
+        cb
+      );
+      strong.start();
+      strong.beginPlayerTurn();
+      strong.playerAttack();
+      expect(strong.getEnemyHp()).toBe(0);
+      expect(strong.getState()).toBe(BattleState.CHECK_END);
+    });
+
+    it('player takes zero damage when one-shotting an enemy', () => {
+      const cb = makeCallbacks();
+      const strong = new BattleSystem(
+        { hp: 20, maxHp: 20, attack: 999, defense: 999 },
+        ENEMIES.slime,
+        cb
+      );
+      strong.start();
+      strong.beginPlayerTurn();
+      const hpBefore = strong.getPlayerHp();
+      strong.playerAttack();
+      // Enemy is dead — enemyTurn should be a no-op
+      strong.enemyTurn();
+      strong.checkEnd();
+      expect(strong.getPlayerHp()).toBe(hpBefore);
+      expect(strong.getState()).toBe(BattleState.VICTORY);
+      expect(cb.onBattleEnd).toHaveBeenCalledWith('victory');
+    });
+
+    it('enemy still gets a turn when surviving player attack', () => {
+      const cb = makeCallbacks();
+      const durable = new BattleSystem(
+        { hp: 999, maxHp: 999, attack: 1, defense: 0 },
+        { key: 'tank', name: 'Tank', hp: 999, attack: 5, defense: 999, spriteKey: 'slime', xpReward: 0 },
+        cb
+      );
+      durable.start();
+      durable.beginPlayerTurn();
+      durable.playerAttack();
+      expect(durable.getState()).toBe(BattleState.ENEMY_TURN);
+      const hpBefore = durable.getPlayerHp();
+      durable.enemyTurn();
+      expect(durable.getPlayerHp()).toBeLessThan(hpBefore);
     });
   });
 

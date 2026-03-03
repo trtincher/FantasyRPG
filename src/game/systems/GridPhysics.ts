@@ -6,6 +6,7 @@ export class GridPhysics {
   private isMoving = false;
   private lastDirection = Direction.DOWN;
   private onMoveComplete?: (tileX: number, tileY: number) => void;
+  private blockedTiles: Set<string> = new Set();
 
   constructor(
     private player: Player,
@@ -15,6 +16,13 @@ export class GridPhysics {
 
   setOnMoveComplete(callback: (tileX: number, tileY: number) => void): void {
     this.onMoveComplete = callback;
+  }
+
+  setBlockedTiles(tiles: { tileX: number; tileY: number }[]): void {
+    this.blockedTiles.clear();
+    for (const t of tiles) {
+      this.blockedTiles.add(`${t.tileX},${t.tileY}`);
+    }
   }
 
   update(cursors: Phaser.Types.Input.Keyboard.CursorKeys): void {
@@ -80,7 +88,8 @@ export class GridPhysics {
     const tileX = Math.floor(targetX / TILE_SIZE);
     const tileY = Math.floor(targetY / TILE_SIZE);
     const tile = this.wallsLayer.getTileAt(tileX, tileY);
-    return tile !== null;
+    if (tile !== null) return true;
+    return this.blockedTiles.has(`${tileX},${tileY}`);
   }
 
   getIsMoving(): boolean {

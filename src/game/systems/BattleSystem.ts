@@ -61,7 +61,7 @@ export class BattleSystem {
     this.enemyHp = Math.max(0, this.enemyHp - damage);
     this.callbacks.onDamageDealt('enemy', damage, this.enemyHp);
 
-    this.state = BattleState.ENEMY_TURN;
+    this.state = this.enemyHp <= 0 ? BattleState.CHECK_END : BattleState.ENEMY_TURN;
     this.callbacks.onStateChange(this.state);
 
     return damage;

@@ -10,6 +10,7 @@ import { STORY_TRIGGERS } from '../data/story';
 import { PauseMenu } from '../systems/PauseMenu';
 import { ITEMS } from '../data/items';
 import { addItem, deserializeInventory, serializeInventory } from '../utils/inventory';
+import { WorldHUD } from '../systems/WorldHUD';
 
 interface EncounterSpawn {
   id: string;
@@ -76,6 +77,8 @@ export class WorldScene extends Scene {
   private pauseMenu!: PauseMenu;
   private collectedPickups: Set<string> = new Set();
   private pickups: { id: string; itemKey: string; tileX: number; tileY: number; sprite: Phaser.GameObjects.Image }[] = [];
+  private worldHUD!: WorldHUD;
+  private interactPrompt!: Phaser.GameObjects.Text;
 
   constructor() {
     super('WorldScene');
@@ -188,6 +191,7 @@ export class WorldScene extends Scene {
       this.input.keyboard.on('keydown-SPACE', this.handleInteraction, this);
       this.input.keyboard.on('keydown-ESC', this.handleEscape, this);
       this.input.keyboard.on('keydown', (event: KeyboardEvent) => {
+        if (event.key === 'Escape') return; // Handled by keydown-ESC
         if (this.pauseMenu.getIsActive()) {
           this.pauseMenu.handleInput(event);
         }
@@ -195,8 +199,19 @@ export class WorldScene extends Scene {
     }
 
     this.gridPhysics = new GridPhysics(this.player, this.wallsLayer, this);
+    this.gridPhysics.setBlockedTiles(this.npcs.map((n) => ({ tileX: n.data.tileX, tileY: n.data.tileY })));
 
     this.pauseMenu = new PauseMenu(this);
+
+    this.worldHUD = new WorldHUD(this);
+    this.refreshHUD();
+
+    this.interactPrompt = this.add.text(0, 0, 'Press Enter to Speak', {
+      fontSize: '7px',
+      color: '#ffffff',
+      backgroundColor: '#000000aa',
+      padding: { x: 3, y: 2 },
+    }).setOrigin(0.5).setDepth(900).setVisible(false);
 
     this.gridPhysics.setOnMoveComplete((tileX: number, tileY: number) => {
       if (this.scene.isActive('BattleScene')) return;
@@ -289,6 +304,8 @@ export class WorldScene extends Scene {
           this.game.registry.set('defeatedEncounters', JSON.stringify(Array.from(this.defeatedEncounters)));
         }
       }
+
+      this.refreshHUD();
     });
 
     this.cameras.main.startFollow(this.player, true, 1, 1);
@@ -297,20 +314,21 @@ export class WorldScene extends Scene {
   }
 
   update(_time: number, _delta: number): void {
-    if (this.dialogueSystem.getIsActive()) return;
-    if (this.pauseMenu.getIsActive()) return;
+    if (this.dialogueSystem.getIsActive()) {
+      this.hideInteractPrompt();
+      return;
+    }
+    if (this.pauseMenu.getIsActive()) {
+      this.hideInteractPrompt();
+      return;
+    }
     if (this.cursors) {
       this.gridPhysics.update(this.cursors);
     }
+    this.updateInteractPrompt();
   }
 
-  private handleInteraction(): void {
-    if (this.pauseMenu.getIsActive()) return;
-    if (this.dialogueSystem.getIsActive()) {
-      this.dialogueSystem.advance();
-      return;
-    }
-
+  private getFacingTile(): { tileX: number; tileY: number } {
     const facingDir = this.gridPhysics.getLastDirection();
     const playerTileX = Math.floor(this.player.x / TILE_SIZE);
     const playerTileY = Math.floor(this.player.y / TILE_SIZE);
@@ -333,11 +351,44 @@ export class WorldScene extends Scene {
         break;
     }
 
-    const npc = this.npcs.find(
-      (n) => n.data.tileX === facingTileX && n.data.tileY === facingTileY
-    );
+    return { tileX: facingTileX, tileY: facingTileY };
+  }
 
+  private getFacingNPC(): NPCEntity | undefined {
+    const { tileX, tileY } = this.getFacingTile();
+    return this.npcs.find(
+      (n) => n.data.tileX === tileX && n.data.tileY === tileY
+    );
+  }
+
+  private updateInteractPrompt(): void {
+    const npc = this.getFacingNPC();
     if (npc) {
+      const npcPixelX = npc.data.tileX * TILE_SIZE + TILE_SIZE / 2;
+      const npcPixelY = npc.data.tileY * TILE_SIZE - 6;
+      this.interactPrompt.setPosition(npcPixelX, npcPixelY);
+      this.interactPrompt.setVisible(true);
+    } else {
+      this.hideInteractPrompt();
+    }
+  }
+
+  private hideInteractPrompt(): void {
+    if (this.interactPrompt) {
+      this.interactPrompt.setVisible(false);
+    }
+  }
+
+  private handleInteraction(): void {
+    if (this.pauseMenu.getIsActive()) return;
+    if (this.dialogueSystem.getIsActive()) {
+      this.dialogueSystem.advance();
+      return;
+    }
+
+    const npc = this.getFacingNPC();
+    if (npc) {
+      this.hideInteractPrompt();
       this.dialogueSystem.show(npc.data.dialogueKey);
     }
   }
@@ -348,6 +399,12 @@ export class WorldScene extends Scene {
       this.pauseMenu.hide();
     } else {
       this.pauseMenu.show();
+    }
+  }
+
+  refreshHUD(): void {
+    if (this.worldHUD) {
+      this.worldHUD.update(this.player.name, this.player.level, this.player.hp, this.player.maxHp);
     }
   }
 

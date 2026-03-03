@@ -134,6 +134,7 @@ export class PauseMenu {
     this.destroyElements();
     this.render();
     this.showMessage(`Used ${item.name}!`);
+    (this.scene as any).refreshHUD?.();
   }
 
   private performSave(): void {

@@ -39,7 +39,7 @@ export class BattleScene extends Scene {
   private readonly enemyBarX = 160;
   private readonly enemyBarY = 10;
   private readonly playerBarX = 160;
-  private readonly playerBarY = 172;
+  private readonly playerBarY = 152;
 
   private menuIndex = 0;
   private menuOptions = ['Attack', 'Defend', 'Item', 'Flee'];
@@ -87,13 +87,13 @@ export class BattleScene extends Scene {
 
     this.enemySprite = this.add.image(160, 70, enemyData.spriteKey);
 
-    this.messageText = this.add.text(10, 130, '', {
+    this.messageText = this.add.text(10, 115, '', {
       fontSize: '11px',
       color: '#ffffff',
       wordWrap: { width: 300 },
     });
 
-    this.playerLabel = this.add.text(10, 170, `${this.initData.playerName} Lv.${this.initData.playerLevel}`, {
+    this.playerLabel = this.add.text(10, 140, `${this.initData.playerName} Lv.${this.initData.playerLevel}`, {
       fontSize: '12px',
       color: '#ffffff',
     });
@@ -112,7 +112,7 @@ export class BattleScene extends Scene {
       playerHp / playerMaxHp
     );
 
-    this.menuText = this.add.text(20, 210, '', {
+    this.menuText = this.add.text(20, 170, '', {
       fontSize: '12px',
       color: '#ffffff',
     });

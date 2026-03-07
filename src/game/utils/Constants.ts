@@ -2,7 +2,6 @@ export const TILE_SIZE = 16;
 export const MOVE_DURATION = 200;
 export const CANVAS_WIDTH = 320;
 export const CANVAS_HEIGHT = 240;
-export const ZOOM = 2;
 export const MAP_WIDTH = 50;
 export const MAP_HEIGHT = 40;
 export const PLAYER_SPAWN_X = 5;

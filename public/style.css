@@ -1,8 +1,12 @@
-body {
+* {
     margin: 0;
     padding: 0;
-    color: rgba(255, 255, 255, 0.87);
+    box-sizing: border-box;
+}
+
+body {
     background-color: #0f0f0f;
+    overflow: hidden;
 }
 
 #app {
@@ -12,4 +16,10 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
+}
+
+canvas {
+    image-rendering: pixelated;
+    image-rendering: crisp-edges;
+    image-rendering: -moz-crisp-edges;
 }

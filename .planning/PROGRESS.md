@@ -10,11 +10,13 @@
 
 | Attribute | Value |
 |-----------|-------|
-| **Current Phase** | Phase 5: Systems & Polish — COMPLETE |
-| **Phase Progress** | 100% (All 10 tasks done, 161 tests passing, build clean) |
-| **Overall Progress** | Planning: 100% / Implementation: Phase 5 done |
+| **Current Phase** | V1 Complete → V2 Discovery Complete |
+| **Phase Progress** | V2 PRD written (`docs/02_discovery_v2.md`) |
+| **Overall Progress** | V1: 100% / V2: Discovery done, Architecture next |
 | **Blockers** | None |
-| **Work Plan** | `.sisyphus/plans/phase5-systems-polish.md` |
+| **Next Step** | **Station 2: Architecture** — `/factory:architect` on V2 PRD |
+| **Open PRs** | [#6](https://github.com/trtincher/FantasyRPG/pull/6) UX fixes, [#7](https://github.com/trtincher/FantasyRPG/pull/7) V2 Discovery |
+| **Current Branch** | `docs/v2-discovery` (merge PR #7 first, then start architecture) |
 
 ---
 
@@ -314,9 +316,7 @@
 - Potion pickups tracked in collectedPickups Set, persisted in save data
 
 **Next Session:**
-- Begin Phase 6: Final Polish (if applicable per ROADMAP.md)
-- Or: Create PR for Phase 5
-
+- V2 Discovery complete — run Station 2: Architecture next
 ---
 
 ## Quick Reference
@@ -342,6 +342,7 @@ npm run build
 | `.sisyphus/plans/phase4-world-expansion.md` | Phase 4 work plan |
 | `.sisyphus/plans/phase5-systems-polish.md` | Phase 5 work plan |
 | `docs/01_discovery.md` | PRD with all requirements |
+| `docs/02_discovery_v2.md` | **V2 PRD** — LitRPG-inspired battle system + progression |
 
 ### Resources
 - [Monster Tamer Tutorial](https://www.youtube.com/playlist?list=PLmcXe0-sfoSgq-pyXrFx0GZjHbvoVUW8t)
@@ -354,8 +355,41 @@ npm run build
 
 *Add any important notes, learnings, or context here for future sessions.*
 
-- 
+- V1 complete (all 5 phases). V2 pivots from learning to fun/shareable.
+- V2 scope: same single dungeon, dramatically deeper combat + progression mechanics.
+- Key references: He Who Fights with Monsters, Mage Tank, Octopath Traveler, Expedition 33, BG3/D&D.
+- Design principle: "Simple to learn, complex to combine."
 
 ---
 
-*Last Updated: Feb 6, 2026 4:25 PM*
+### Session 8 - Mar 7, 2026
+**Duration:** ~45 min
+**Focus:** V2 Discovery (Station 1)
+
+**Completed:**
+- [x] V2 Discovery session — full question loop (4 rounds)
+- [x] Research: HWFWM mechanics (essences, ranks, spirit coins, party dynamics)
+- [x] Research: Mage Tank mechanics (classless stats, evolutions, Delves)
+- [x] Research: Cross-series LitRPG patterns (6 universal patterns identified)
+- [x] Research: Game design precedents (Octopath Break/Shield, Expedition 33 AP, D&D 5e)
+- [x] V2 PRD written (`docs/02_discovery_v2.md`) — 20 requirements, 9 open questions
+- [x] PR #6 created: UX fixes (`feature/ux-and-battle-improvements`)
+- [x] PR #7 created: V2 Discovery (`docs/v2-discovery`)
+
+**Key V2 Decisions:**
+- Single MC (isekai) + 3 recruited party members (4 total in combat)
+- System-as-personal-interface (MC sees game UI, others don't)
+- Combat: AP/Boost + Break/Shield + layered discoverable weaknesses + party synergy
+- Progression: Essence system + rank thresholds (Iron→Bronze→Silver) + skill-use leveling
+- Modular architecture for future dungeon/world expansion
+- Art + audio deferred to V3
+
+**Next Session — TO RESUME:**
+1. Merge PR #6 and PR #7
+2. Run **Station 2: Architecture** (`/factory:architect`) on V2 PRD
+3. Input doc: `docs/02_discovery_v2.md`
+4. Output: `.planning/ROADMAP_V2.md` + `.planning/REQUIREMENTS_V2.md`
+
+---
+
+*Last Updated: Mar 7, 2026*
